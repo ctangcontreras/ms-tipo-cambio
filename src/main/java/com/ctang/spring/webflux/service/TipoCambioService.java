@@ -1,7 +1,6 @@
 package com.ctang.spring.webflux.service;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Service;
 import com.ctang.spring.webflux.client.TipoCambioClient;
 import com.ctang.spring.webflux.entity.Cambio;
 import com.ctang.spring.webflux.model.CambioRequest;
-import com.ctang.spring.webflux.model.HttpResult;
 import com.ctang.spring.webflux.model.TipoCambio;
 import com.ctang.spring.webflux.repository.CambioRepository;
 

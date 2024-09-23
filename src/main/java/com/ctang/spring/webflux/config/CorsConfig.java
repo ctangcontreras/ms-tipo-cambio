@@ -11,12 +11,10 @@ public class CorsConfig implements WebFluxConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOriginPatterns("http://localhost:9191")
-                .allowedOrigins("*")
-                .allowedMethods("POST", "GET", "PUT", "OPTIONS", "DELETE")
+        .allowedOriginPatterns("http://localhost:*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .maxAge(10000)
-                .allowedHeaders("*")
-                .allowCredentials(true)
+                .allowedHeaders("*") 
                 ;
     }
 }

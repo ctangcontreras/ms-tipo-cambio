@@ -1,63 +1,40 @@
 package com.ctang.spring.webflux.config;
  
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
+import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
 
-import com.ctang.spring.webflux.handler.JwtWebFilter;
-import com.ctang.spring.webflux.security.SecurityContextRepository;
-
-import lombok.AllArgsConstructor;
- 
+@Configuration
 @EnableWebFluxSecurity
-@EnableReactiveMethodSecurity
-@AllArgsConstructor
- @Configuration
-public class SecurityConfig {
-
-    private final SecurityContextRepository securityRepository;
+class SecurityConfig {
 
     @Bean
-    public SecurityWebFilterChain securityWebFilterChain(
-                ServerHttpSecurity http,
-                JwtWebFilter jwtWebFilter
-        ) {
+    SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http,
+                                                     ReactiveAuthenticationManager authenticationManager,
+                                                     ServerAuthenticationConverter authenticationConverter) {
+        AuthenticationWebFilter authenticationWebFilter = new AuthenticationWebFilter(authenticationManager);
+        authenticationWebFilter.setServerAuthenticationConverter(authenticationConverter);
 
         return http
-                .authorizeExchange()
-                .pathMatchers("/auth/login", "/auth/signup","**/cliente/getInfo/**","/v3/api-docs/**",
-         
-                "/swagger-resources/configuration/ui",
-                "/swagger-doc/v3/api-docs/swagger-config",
-                "/swagger-doc/v3/api-docs",
-                "/swagger-doc/swagger-ui.html",
-                "/swagger-doc/webjars/swagger-ui/index.html",
-                "**/swagger-doc/**",
-                "/swagger-resources",
-                "/swagger-resources/configuration/security",
-                "/swagger-ui.html",
-                "/css/**", 
-                "/js/**",
-                "/images/**", 
-                "/webjars/**", 
-                "/swagger-ui/**", 
-                "/swagger-doc/webjars/swagger-ui/favicon-32x32.png", 
-                "**/favicon.ico", 
-                "/index").permitAll()
-                .anyExchange().authenticated()
-                .and()
-                .addFilterAfter(jwtWebFilter, SecurityWebFiltersOrder.FIRST)   
-                .securityContextRepository(securityRepository)
-                .formLogin().disable()
-                .httpBasic().disable()
-                .csrf().disable()
-                .cors().disable()
-                .logout().disable()
+                .authorizeExchange(exchanges -> exchanges
+                        .pathMatchers(HttpMethod.POST, "/login").permitAll()
+                        .pathMatchers(HttpMethod.OPTIONS, "/login").permitAll()
+                        .pathMatchers(HttpMethod.OPTIONS).permitAll() 
+                        .anyExchange().authenticated()
+                )
+                .addFilterAt(authenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+                .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
+                .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .cors(ServerHttpSecurity.CorsSpec::disable)
                 .build();
     }
-    
 }
